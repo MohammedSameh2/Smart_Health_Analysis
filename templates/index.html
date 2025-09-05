@@ -6,28 +6,51 @@
     <title>MedAI - تحليل صحي ذكي</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            /* Light Mode Colors */
+            --bg-color-light: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            --card-bg-light: #FFFFFF;
+            --text-color-light: #1A5276;
+            --secondary-text-light: #6B7280;
+            --border-color-light: #c0d9e7;
+            --btn-bg-light: #3498db;
+
+            /* Dark Mode Colors */
+            --bg-color-dark: #121212;
+            --card-bg-dark: #1e1e1e;
+            --text-color-dark: #e2e8f0;
+            --secondary-text-dark: #a0a0a0;
+            --border-color-dark: #3a4b5d;
+            --btn-bg-dark: #63b4eb;
         }
 
         body {
-            font-family: 'Tajawal', 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+            background: var(--bg-color-light);
             min-height: 100vh;
             padding: 20px;
-            color: #333;
+            color: var(--text-color-light);
+            transition: background 0.5s, color 0.5s;
+        }
+
+        .dark-mode {
+            background: var(--bg-color-dark);
+            color: var(--text-color-dark);
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--card-bg-light);
             border-radius: 20px;
-            backdrop-filter: blur(10px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            transition: background 0.5s, box-shadow 0.5s;
+        }
+
+        .dark-mode .container {
+            background: var(--card-bg-dark);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         header {
@@ -37,6 +60,7 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            border-radius: 20px 20px 0 0;
         }
 
         header::before {
@@ -69,6 +93,18 @@
             z-index: 1;
         }
 
+        .header-controls {
+            position: absolute;
+            top: 20px;
+            width: 95%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
         .dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -77,30 +113,23 @@
         }
 
         .metric-card {
-            background: white;
+            background: var(--card-bg-light);
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color-light);
             transition: all 0.3s ease;
             position: relative;
-            overflow: hidden;
+        }
+
+        .dark-mode .metric-card {
+            background: var(--card-bg-dark);
+            border: 1px solid var(--border-color-dark);
         }
 
         .metric-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .metric-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--card-color, #3498db);
-            border-radius: 15px 15px 0 0;
         }
 
         .card-header {
@@ -129,14 +158,22 @@
         .metric-name {
             font-size: 1.2em;
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--text-color-light);
             line-height: 1.3;
+        }
+
+        .dark-mode .metric-name {
+            color: var(--text-color-dark);
         }
 
         .english-name {
             font-size: 0.9em;
-            color: #7f8c8d;
+            color: var(--secondary-text-light);
             font-weight: normal;
+        }
+
+        .dark-mode .english-name {
+            color: var(--secondary-text-dark);
         }
 
         .input-section {
@@ -160,13 +197,25 @@
             transition: all 0.3s ease;
             background: #f8f9fa;
             font-family: 'Tajawal', sans-serif;
+            color: #333;
+        }
+
+        .dark-mode input[type="number"] {
+            background: #2d2d2d;
+            border-color: #3a4b5d;
+            color: var(--text-color-dark);
         }
 
         input[type="number"]:focus {
             outline: none;
-            border-color: var(--card-color, #3498db);
+            border-color: #3498db;
             background: white;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .dark-mode input[type="number"]:focus {
+            background: #1e1e1e;
+            box-shadow: 0 0 0 3px rgba(99, 180, 235, 0.1);
         }
 
         .unit {
@@ -176,6 +225,11 @@
             font-size: 0.9em;
             color: #7f8c8d;
             white-space: nowrap;
+        }
+        
+        .dark-mode .unit {
+            background: #2d2d2d;
+            color: #a0a0a0;
         }
 
         .status-indicator {
@@ -191,17 +245,6 @@
         .status-normal { background: #d4edda; color: #155724; }
         .status-warning { background: #fff3cd; color: #856404; }
         .status-danger { background: #f8d7da; color: #721c24; }
-
-        /* Color themes for different metrics */
-        .hba1c { --card-color: #e74c3c; }
-        .systolic { --card-color: #e67e22; }
-        .diastolic { --card-color: #f39c12; }
-        .ldl { --card-color: #d35400; }
-        .hdl { --card-color: #27ae60; }
-        .triglycerides { --card-color: #8e44ad; }
-        .haemoglobin { --card-color: #c0392b; }
-        .mcv { --card-color: #2980b9; }
-        .glucose { --card-color: #16a085; }
 
         .analysis-section {
             grid-column: 1 / -1;
@@ -243,6 +286,7 @@
             display: none;
             text-align: center;
             margin-top: 20px;
+            color: white;
         }
 
         .loading.show {
@@ -272,6 +316,7 @@
             backdrop-filter: blur(5px);
             display: none;
             text-align: right;
+            color: white;
         }
 
         .results-area.show {
@@ -301,7 +346,7 @@
             margin-bottom: 15px;
             border-right: 4px solid rgba(255, 255, 255, 0.5);
         }
-
+        
         .result-section h4 {
             font-size: 1.3em;
             font-weight: bold;
@@ -346,22 +391,44 @@
                 padding: 20px;
             }
         }
-
+        
         .fade-in {
             animation: fadeIn 0.8s ease-in-out;
         }
-
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Language and Dark Mode Toggle */
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
+            <div class="header-controls">
+                <button id="lang-toggle" class="toggle-btn">English</button>
+                <button id="dark-mode-toggle" class="toggle-btn">
+                    <span id="toggle-icon">🌙</span>
+                </button>
+            </div>
             <h1>🩺 MedAI</h1>
-            <div class="subtitle">تحليل صحي ذكي | Smart Health Analysis</div>
+            <div class="subtitle" data-lang-key="app_subtitle">تحليل صحي ذكي | Smart Health Analysis</div>
         </header>
 
         <form id="health-form" class="dashboard">
@@ -371,14 +438,14 @@
                     <div class="card-title">
                         <span class="emoji">💉</span>
                         <div>
-                            <div class="metric-name">نسبة السكر التراكمي</div>
+                            <div class="metric-name" data-lang-key="hba1c_name">نسبة السكر التراكمي</div>
                             <div class="english-name">HbA1C</div>
                         </div>
                     </div>
                 </div>
                 <div class="input-section">
                     <div class="input-group">
-                        <input type="number" id="hba1c" name="HbA1C" placeholder="أدخل القيمة" step="0.01">
+                        <input type="number" id="hba1c" name="HbA1C" placeholder="" step="0.01">
                         <span class="unit">%</span>
                     </div>
                     <div id="hba1c-status" class="status-indicator" style="display: none;"></div>
@@ -391,14 +458,14 @@
                     <div class="card-title">
                         <span class="emoji">🫀</span>
                         <div>
-                            <div class="metric-name">ضغط الدم الانقباضي</div>
+                            <div class="metric-name" data-lang-key="systolic_name">ضغط الدم الانقباضي</div>
                             <div class="english-name">Systolic BP</div>
                         </div>
                     </div>
                 </div>
                 <div class="input-section">
                     <div class="input-group">
-                        <input type="number" id="systolic_bp" name="Systolic_BP" placeholder="أدخل القيمة" step="0.01">
+                        <input type="number" id="systolic_bp" name="Systolic_BP" placeholder="" step="0.01">
                         <span class="unit">mmHg</span>
                     </div>
                     <div id="systolic-status" class="status-indicator" style="display: none;"></div>
@@ -411,14 +478,14 @@
                     <div class="card-title">
                         <span class="emoji">🩺</span>
                         <div>
-                            <div class="metric-name">ضغط الدم الانبساطي</div>
+                            <div class="metric-name" data-lang-key="diastolic_name">ضغط الدم الانبساطي</div>
                             <div class="english-name">Diastolic BP</div>
                         </div>
                     </div>
                 </div>
                 <div class="input-section">
                     <div class="input-group">
-                        <input type="number" id="diastolic_bp" name="Diastolic_BP" placeholder="أدخل القيمة" step="0.01">
+                        <input type="number" id="diastolic_bp" name="Diastolic_BP" placeholder="" step="0.01">
                         <span class="unit">mmHg</span>
                     </div>
                     <div id="diastolic-status" class="status-indicator" style="display: none;"></div>
@@ -431,14 +498,14 @@
                     <div class="card-title">
                         <span class="emoji">🧈</span>
                         <div>
-                            <div class="metric-name">الكوليسترول الضار</div>
+                            <div class="metric-name" data-lang-key="ldl_name">الكوليسترول الضار</div>
                             <div class="english-name">LDL</div>
                         </div>
                     </div>
                 </div>
                 <div class="input-section">
                     <div class="input-group">
-                        <input type="number" id="ldl" name="LDL" placeholder="أدخل القيمة" step="0.01">
+                        <input type="number" id="ldl" name="LDL" placeholder="" step="0.01">
                         <span class="unit">mg/dL</span>
                     </div>
                     <div id="ldl-status" class="status-indicator" style="display: none;"></div>
@@ -451,14 +518,14 @@
                     <div class="card-title">
                         <span class="emoji">✨</span>
                         <div>
-                            <div class="metric-name">الكوليسترول النافع</div>
+                            <div class="metric-name" data-lang-key="hdl_name">الكوليسترول النافع</div>
                             <div class="english-name">HDL</div>
                         </div>
                     </div>
                 </div>
                 <div class="input-section">
                     <div class="input-group">
-                        <input type="number" id="hdl" name="HDL" placeholder="أدخل القيمة" step="0.01">
+                        <input type="number" id="hdl" name="HDL" placeholder="" step="0.01">
                         <span class="unit">mg/dL</span>
                     </div>
                     <div id="hdl-status" class="status-indicator" style="display: none;"></div>
@@ -471,14 +538,14 @@
                     <div class="card-title">
                         <span class="emoji">🍔</span>
                         <div>
-                            <div class="metric-name">الدهون الثلاثية</div>
+                            <div class="metric-name" data-lang-key="triglycerides_name">الدهون الثلاثية</div>
                             <div class="english-name">Triglycerides</div>
                         </div>
                     </div>
                 </div>
                 <div class="input-section">
                     <div class="input-group">
-                        <input type="number" id="triglycerides" name="Triglycerides" placeholder="أدخل القيمة" step="0.01">
+                        <input type="number" id="triglycerides" name="Triglycerides" placeholder="" step="0.01">
                         <span class="unit">mg/dL</span>
                     </div>
                     <div id="triglycerides-status" class="status-indicator" style="display: none;"></div>
@@ -491,14 +558,14 @@
                     <div class="card-title">
                         <span class="emoji">🩸</span>
                         <div>
-                            <div class="metric-name">الهيموجلوبين</div>
+                            <div class="metric-name" data-lang-key="haemoglobin_name">الهيموجلوبين</div>
                             <div class="english-name">Haemoglobin</div>
                         </div>
                     </div>
                 </div>
                 <div class="input-section">
                     <div class="input-group">
-                        <input type="number" id="haemoglobin" name="Haemoglobin" placeholder="أدخل القيمة" step="0.01">
+                        <input type="number" id="haemoglobin" name="Haemoglobin" placeholder="" step="0.01">
                         <span class="unit">g/dL</span>
                     </div>
                     <div id="haemoglobin-status" class="status-indicator" style="display: none;"></div>
@@ -511,14 +578,14 @@
                     <div class="card-title">
                         <span class="emoji">🔬</span>
                         <div>
-                            <div class="metric-name">متوسط حجم الكرية</div>
+                            <div class="metric-name" data-lang-key="mcv_name">متوسط حجم الكرية</div>
                             <div class="english-name">MCV</div>
                         </div>
                     </div>
                 </div>
                 <div class="input-section">
                     <div class="input-group">
-                        <input type="number" id="mcv" name="MCV" placeholder="أدخل القيمة" step="0.01">
+                        <input type="number" id="mcv" name="MCV" placeholder="" step="0.01">
                         <span class="unit">fL</span>
                     </div>
                     <div id="mcv-status" class="status-indicator" style="display: none;"></div>
@@ -531,14 +598,14 @@
                     <div class="card-title">
                         <span class="emoji">🍬</span>
                         <div>
-                            <div class="metric-name">مستوى السكر في الدم</div>
+                            <div class="metric-name" data-lang-key="glucose_name">مستوى السكر في الدم</div>
                             <div class="english-name">Blood Glucose</div>
                         </div>
                     </div>
                 </div>
                 <div class="input-section">
                     <div class="input-group">
-                        <input type="number" id="blood_glucose" name="blood_glucose" placeholder="أدخل القيمة" step="0.01">
+                        <input type="number" id="blood_glucose" name="blood_glucose" placeholder="" step="0.01">
                         <span class="unit">mg/dL</span>
                     </div>
                     <div id="glucose-status" class="status-indicator" style="display: none;"></div>
@@ -547,12 +614,12 @@
 
             <!-- Analysis Section -->
             <div class="analysis-section">
-                <h2>📊 تحليل النتائج | Analysis Results</h2>
-                <button type="submit" class="analysis-btn" id="analyze-btn">تحليل شامل للنتائج</button>
+                <h2 id="analysis-title" data-lang-key="analysis_title">📊 تحليل النتائج | Analysis Results</h2>
+                <button type="submit" class="analysis-btn" id="analyze-btn" data-lang-key="analyze_btn">تحليل شامل للنتائج</button>
                 
                 <div class="loading" id="loading">
                     <div class="spinner"></div>
-                    <p>جاري تحليل البيانات...</p>
+                    <p data-lang-key="loading_text">جاري تحليل البيانات...</p>
                 </div>
 
                 <div id="results" class="results-area">
@@ -561,7 +628,7 @@
                         <div id="result-title" class="result-title"></div>
                     </div>
                     <div id="result-content"></div>
-                    <button class="reset-btn" id="reset-btn">إدخال بيانات جديدة</button>
+                    <button class="reset-btn" id="reset-btn" data-lang-key="reset_btn">إدخال بيانات جديدة</button>
                 </div>
             </div>
         </form>
@@ -581,80 +648,178 @@
             glucose: { low: [0, 70], normal: [70, 100], prediabetes: [100, 126], diabetes: [126, 500] }
         };
 
+        const translations = {
+            'ar': {
+                app_subtitle: 'تحليل صحي ذكي | Smart Health Analysis',
+                hba1c_name: 'نسبة السكر التراكمي',
+                systolic_name: 'ضغط الدم الانقباضي',
+                diastolic_name: 'ضغط الدم الانبساطي',
+                ldl_name: 'الكوليسترول الضار',
+                hdl_name: 'الكوليسترول النافع',
+                triglycerides_name: 'الدهون الثلاثية',
+                haemoglobin_name: 'الهيموجلوبين',
+                mcv_name: 'متوسط حجم الكرية',
+                glucose_name: 'مستوى السكر في الدم',
+                analysis_title: '📊 تحليل النتائج | Analysis Results',
+                analyze_btn: 'تحليل شامل للنتائج',
+                loading_text: 'جاري تحليل البيانات...',
+                reset_btn: 'إدخال بيانات جديدة',
+                result_title: 'النتيجة والإرشادات',
+                prevention_label: '🔹 وقاية:',
+                treatment_label: '🔹 علاج:',
+                suggested_plan_label: '💊 طريقة علاج مقترحة:',
+                placeholder: 'أدخل القيمة',
+                status: {
+                    normal: 'طبيعي | Normal',
+                    warning: 'غير طبيعي | Abnormal',
+                    danger: 'خطر | Danger',
+                    prediabetes: 'ما قبل السكري | Pre-diabetes',
+                    diabetes: 'سكري | Diabetes',
+                    elevated: 'مرتفع | Elevated',
+                    high_bp: 'ضغط مرتفع | High BP',
+                    optimal: 'مثالي | Optimal',
+                    near: 'على الحد | Near',
+                    borderline: 'حدي | Borderline',
+                    high: 'مرتفع | High',
+                    good: 'جيد | Good',
+                    low: 'منخفض | Low',
+                    entered: 'تم الإدخال | Entered'
+                },
+                disease_titles: {
+                    Anemia: 'الأنيميا (فقر الدم)',
+                    Hypertension: 'ارتفاع ضغط الدم',
+                    Diabetes: 'مرض السكر',
+                    High_Cholesterol: 'ارتفاع الكوليسترول',
+                    Fit: 'سليم (طبيعي)'
+                }
+            },
+            'en': {
+                app_subtitle: 'Smart Health Analysis | تحليل صحي ذكي',
+                hba1c_name: 'Glycated Hemoglobin',
+                systolic_name: 'Systolic Blood Pressure',
+                diastolic_name: 'Diastolic Blood Pressure',
+                ldl_name: 'Bad Cholesterol',
+                hdl_name: 'Good Cholesterol',
+                triglycerides_name: 'Triglycerides',
+                haemoglobin_name: 'Hemoglobin',
+                mcv_name: 'Mean Corpuscular Volume',
+                glucose_name: 'Blood Glucose',
+                analysis_title: 'Analysis Results | تحليل النتائج 📊',
+                analyze_btn: 'Comprehensive Analysis',
+                loading_text: 'Analyzing data...',
+                reset_btn: 'Enter New Data',
+                result_title: 'Result and Guidance',
+                prevention_label: '🔹 Prevention:',
+                treatment_label: '🔹 Treatment:',
+                suggested_plan_label: '💊 Suggested Treatment Plan:',
+                placeholder: 'Enter Value',
+                status: {
+                    normal: 'Normal | طبيعي',
+                    warning: 'Abnormal | غير طبيعي',
+                    danger: 'Danger | خطر',
+                    prediabetes: 'Pre-diabetes | ما قبل السكري',
+                    diabetes: 'Diabetes | سكري',
+                    elevated: 'Elevated | مرتفع',
+                    high_bp: 'High BP | ضغط مرتفع',
+                    optimal: 'Optimal | مثالي',
+                    near: 'Near | على الحد',
+                    borderline: 'Borderline | حدي',
+                    high: 'High | مرتفع',
+                    good: 'Good | جيد',
+                    low: 'Low | منخفض',
+                    entered: 'Entered | تم الإدخال'
+                },
+                disease_titles: {
+                    Anemia: 'Anemia',
+                    Hypertension: 'Hypertension',
+                    Diabetes: 'Diabetes',
+                    High_Cholesterol: 'High Cholesterol',
+                    Fit: 'Fit (Normal)'
+                }
+            }
+        };
+
+        let currentLang = 'ar';
+
+        function updateUI() {
+            const lang = currentLang;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+            // Update all elements with data-lang-key
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (key === 'analysis_title') {
+                    el.innerHTML = translations[lang][key];
+                } else {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.placeholder = translations[lang].placeholder;
+            });
+
+            document.getElementById('lang-toggle').textContent = lang === 'ar' ? 'English' : 'العربية';
+            
+            // Re-render result section if it's visible
+            const resultSection = document.getElementById('results');
+            if (resultSection.classList.contains('show')) {
+                const storedResult = JSON.parse(sessionStorage.getItem('healthAnalysisResult'));
+                if (storedResult) {
+                    displayResults(storedResult);
+                }
+            }
+        }
+
         function getStatus(value, metric) {
             const range = ranges[metric];
-            if (!range || !value) return '';
+            if (!range || !value) return { class: '', text: '' };
 
-            switch (metric) {
-                case 'hba1c':
-                    if (value < range.normal[1]) return { class: 'status-normal', text: 'طبيعي | Normal' };
-                    if (value < range.diabetes[0]) return { class: 'status-warning', text: 'ما قبل السكري | Pre-diabetes' };
-                    return { class: 'status-danger', text: 'سكري | Diabetes' };
-
-                case 'systolic':
-                    if (value < range.normal[1]) return { class: 'status-normal', text: 'طبيعي | Normal' };
-                    if (value < range.elevated[1]) return { class: 'status-warning', text: 'مرتفع | Elevated' };
-                    return { class: 'status-danger', text: 'ضغط مرتفع | High BP' };
-
-                case 'diastolic':
-                    if (value < range.normal[1]) return { class: 'status-normal', text: 'طبيعي | Normal' };
-                    if (value < range.elevated[1]) return { class: 'status-warning', text: 'مرتفع | Elevated' };
-                    return { class: 'status-danger', text: 'ضغط مرتفع | High BP' };
-
-                case 'ldl':
-                    if (value < range.optimal[1]) return { class: 'status-normal', text: 'مثالي | Optimal' };
-                    if (value < range.borderline[1]) return { class: 'status-warning', text: 'حدي | Borderline' };
-                    return { class: 'status-danger', text: 'مرتفع | High' };
-
-                case 'hdl':
-                    if (value >= range.normal[0]) return { class: 'status-normal', text: 'جيد | Good' };
-                    return { class: 'status-warning', text: 'منخفض | Low' };
-
-                case 'triglycerides':
-                    if (value < range.normal[1]) return { class: 'status-normal', text: 'طبيعي | Normal' };
-                    if (value < range.high[0]) return { class: 'status-warning', text: 'حدي | Borderline' };
-                    return { class: 'status-danger', text: 'مرتفع | High' };
-
-                case 'glucose':
-                    if (value < range.normal[1]) return { class: 'status-normal', text: 'طبيعي | Normal' };
-                    if (value < range.diabetes[0]) return { class: 'status-warning', text: 'ما قبل السكري | Pre-diabetes' };
-                    return { class: 'status-danger', text: 'سكري | Diabetes' };
-
-                default:
-                    return { class: 'status-normal', text: 'تم الإدخال | Entered' };
+            if (metric === 'hba1c') {
+                if (value < range.normal[1]) return { class: 'status-normal', text: translations[currentLang].status.normal };
+                if (value < range.diabetes[0]) return { class: 'status-warning', text: translations[currentLang].status.prediabetes };
+                return { class: 'status-danger', text: translations[currentLang].status.diabetes };
+            } else if (metric === 'systolic' || metric === 'diastolic') {
+                if (value < range.normal[1]) return { class: 'status-normal', text: translations[currentLang].status.normal };
+                if (value < range.elevated[1]) return { class: 'status-warning', text: translations[currentLang].status.elevated };
+                return { class: 'status-danger', text: translations[currentLang].status.high_bp };
+            } else if (metric === 'ldl') {
+                if (value < range.optimal[1]) return { class: 'status-normal', text: translations[currentLang].status.optimal };
+                if (value < range.borderline[1]) return { class: 'status-warning', text: translations[currentLang].status.borderline };
+                return { class: 'status-danger', text: translations[currentLang].status.high };
+            } else if (metric === 'hdl') {
+                if (value >= range.normal[0]) return { class: 'status-normal', text: translations[currentLang].status.good };
+                return { class: 'status-warning', text: translations[currentLang].status.low };
+            } else if (metric === 'triglycerides') {
+                if (value < range.normal[1]) return { class: 'status-normal', text: translations[currentLang].status.normal };
+                if (value < range.high[0]) return { class: 'status-warning', text: translations[currentLang].status.borderline };
+                return { class: 'status-danger', text: translations[currentLang].status.high };
+            } else if (metric === 'glucose') {
+                if (value < range.normal[1]) return { class: 'status-normal', text: translations[currentLang].status.normal };
+                if (value < range.diabetes[0]) return { class: 'status-warning', text: translations[currentLang].status.prediabetes };
+                return { class: 'status-danger', text: translations[currentLang].status.diabetes };
+            } else {
+                return { class: 'status-normal', text: translations[currentLang].status.entered };
             }
         }
 
         // Add event listeners to inputs for real-time status updates
         document.querySelectorAll('input[type="number"]').forEach(input => {
             input.addEventListener('input', function() {
-                const metric = this.id.replace('_bp', '').replace('_', '');
+                const metric = this.id.replace('_bp', '');
                 const value = parseFloat(this.value);
-                let statusElement = document.getElementById(metric + '-status');
-                
-                // Handle special cases for BP inputs
-                if (this.id === 'systolic_bp') {
-                    statusElement = document.getElementById('systolic-status');
-                } else if (this.id === 'diastolic_bp') {
-                    statusElement = document.getElementById('diastolic-status');
-                } else if (this.id === 'blood_glucose') {
-                    statusElement = document.getElementById('glucose-status');
-                }
-                
-                if (value && !isNaN(value)) {
-                    let statusMetric = metric;
-                    if (this.id === 'systolic_bp') statusMetric = 'systolic';
-                    if (this.id === 'diastolic_bp') statusMetric = 'diastolic';
-                    if (this.id === 'blood_glucose') statusMetric = 'glucose';
-                    
-                    const status = getStatus(value, statusMetric);
-                    if (status && statusElement) {
+                const statusElement = document.getElementById(metric + '-status');
+
+                if (statusElement) { // Check if element exists
+                    if (value && !isNaN(value)) {
+                        const status = getStatus(value, this.id.replace('_bp', ''));
                         statusElement.className = `status-indicator ${status.class}`;
                         statusElement.textContent = status.text;
                         statusElement.style.display = 'block';
+                    } else {
+                        statusElement.style.display = 'none';
                     }
-                } else if (statusElement) {
-                    statusElement.style.display = 'none';
                 }
             });
         });
@@ -667,13 +832,13 @@
             const results = document.getElementById('results');
             const analyzeBtn = document.getElementById('analyze-btn');
             
-            // Show loading
             loading.classList.add('show');
             analyzeBtn.disabled = true;
             results.classList.remove('show');
             
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
+            data['blood_glucose'] = data['blood_glucose'] || '0';
 
             try {
                 const response = await fetch('/predict', {
@@ -686,10 +851,11 @@
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || 'حدث خطأ في الاتصال بالخادم.');
+                    throw new Error(errorData.error || translations[currentLang].errorMessage);
                 }
 
                 const result = await response.json();
+                
                 displayResults(result);
 
             } catch (error) {
@@ -713,19 +879,19 @@
             const rec = result.recommendation;
 
             document.getElementById('result-emoji').textContent = emoji;
-            document.getElementById('result-title').textContent = rec.title;
+            document.getElementById('result-title').textContent = translations[currentLang].disease_titles[result.disease] || result.disease;
             
             const content = `
                 <div class="result-section fade-in">
-                    <h4>🔹 وقاية:</h4>
+                    <h4>${translations[currentLang].prevention_label}</h4>
                     <p>${rec.prevention}</p>
                 </div>
                 <div class="result-section fade-in">
-                    <h4>🔹 علاج:</h4>
+                    <h4>${translations[currentLang].treatment_label}</h4>
                     <p>${rec.treatment}</p>
                 </div>
                 <div class="result-section fade-in">
-                    <h4>💊 طريقة علاج مقترحة:</h4>
+                    <h4>${translations[currentLang].suggested_plan_label}</h4>
                     <p>${rec.suggested_plan}</p>
                 </div>
             `;
@@ -735,11 +901,46 @@
         }
 
         function displayError(message) {
+            const errorTitleKey = currentLang === 'ar' ? 'خطأ | Error' : 'Error | خطأ';
             document.getElementById('result-emoji').textContent = '❌';
-            document.getElementById('result-title').textContent = 'خطأ | Error';
+            document.getElementById('result-title').textContent = errorTitleKey;
             document.getElementById('result-content').innerHTML = `
                 <div class="result-section">
                     <p style="color: #e74c3c; text-align: center;">${message}</p>
                 </div>
             `;
-            document.getElementById('results').classList.add('show');}
+            document.getElementById('results').classList.add('show');
+        }
+
+        // Reset button handler
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            document.getElementById('health-form').reset();
+            document.getElementById('results').classList.remove('show');
+            
+            document.querySelectorAll('.status-indicator').forEach(indicator => {
+                indicator.style.display = 'none';
+            });
+        });
+
+        // Toggle Dark Mode
+        document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const icon = document.getElementById('toggle-icon');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.textContent = '☀️';
+            } else {
+                icon.textContent = '🌙';
+            }
+        });
+        
+        // Toggle Language
+        document.getElementById('lang-toggle').addEventListener('click', () => {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            updateUI();
+        });
+
+        // Initial UI setup
+        updateUI();
+    </script>
+</body>
+</html>
