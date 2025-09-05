@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedAI - تحليل صحي ذكي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="20" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            padding: 40px;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--card-color, #3498db);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emoji {
+            font-size: 2em;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .metric-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            line-height: 1.3;
+        }
+
+        .english-name {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            font-weight: normal;
+        }
+
+        .input-section {
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        input[type="number"] {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--card-color, #3498db);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .unit {
+            background: #ecf0f1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            white-space: nowrap;
+        }
+
+        .status-indicator {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .status-normal { background: #d4edda; color: #155724; }
+        .status-warning { background: #fff3cd; color: #856404; }
+        .status-danger { background: #f8d7da; color: #721c24; }
+
+        /* Color themes for different metrics */
+        .hba1c { --card-color: #e74c3c; }
+        .systolic { --card-color: #e67e22; }
+        .diastolic { --card-color: #f39c12; }
+        .ldl { --card-color: #d35400; }
+        .hdl { --card-color: #27ae60; }
+        .triglycerides { --card-color: #8e44ad; }
+        .haemoglobin { --card-color: #c0392b; }
+        .mcv { --card-color: #2980b9; }
+        .glucose { --card-color: #16a085; }
+
+        .analysis-section {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .analysis-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .analysis-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .analysis-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-area {
+            margin-top: 20px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            display: none;
+            text-align: right;
+        }
+
+        .results-area.show {
+            display: block;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .result-emoji {
+            font-size: 4em;
+            margin-bottom: 10px;
+        }
+
+        .result-title {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .result-section {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-right: 4px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .result-section h4 {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reset-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Tajawal', sans-serif;
+            margin-top: 20px;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .metric-card {
+                padding: 20px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🩺 MedAI</h1>
+            <div class="subtitle">تحليل صحي ذكي | Smart Health Analysis</div>
+        </header>
+
+        <form id="health-form" class="dashboard">
+            <!-- HbA1C -->
+            <div class="metric-card hba1c">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="emoji">💉</span>
+                        <div>
+                            <div class="metric-name">نسبة السكر التراكمي</div>
+                            <div class="english-name">HbA1C</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-section">
+                    <div class="input-group">
+                        <input type="number" id="hba1c" name="HbA1C" placeholder="أدخل القيمة" step="0.01">
+                        <span class="unit">%</span>
+                    </div>
+                    <div id="hba1c-status" class="status-indicator" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Systolic BP -->
+            <div class="metric-card systolic">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="emoji">🫀</span>
+                        <div>
+                            <div class="metric-name">ضغط الدم الانقباضي</div>
+                            <div class="english-name">Systolic BP</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-section">
+                    <div class="input-group">
+                        <input type="number" id="systolic_bp" name="Systolic_BP" placeholder="أدخل القيمة" step="0.01">
+                        <span class="unit">mmHg</span>
+                    </div>
+                    <div id="systolic-status" class="status-indicator" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Diastolic BP -->
+            <div class="metric-card diastolic">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="emoji">🩺</span>
+                        <div>
+                            <div class="metric-name">ضغط الدم الانبساطي</div>
+                            <div class="english-name">Diastolic BP</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-section">
+                    <div class="input-group">
+                        <input type="number" id="diastolic_bp" name="Diastolic_BP" placeholder="أدخل القيمة" step="0.01">
+                        <span class="unit">mmHg</span>
+                    </div>
+                    <div id="diastolic-status" class="status-indicator" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- LDL -->
+            <div class="metric-card ldl">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="emoji">🧈</span>
+                        <div>
+                            <div class="metric-name">الكوليسترول الضار</div>
+                            <div class="english-name">LDL</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-section">
+                    <div class="input-group">
+                        <input type="number" id="ldl" name="LDL" placeholder="أدخل القيمة" step="0.01">
+                        <span class="unit">mg/dL</span>
+                    </div>
+                    <div id="ldl-status" class="status-indicator" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- HDL -->
+            <div class="metric-card hdl">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="emoji">✨</span>
+                        <div>
+                            <div class="metric-name">الكوليسترول النافع</div>
+                            <div class="english-name">HDL</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-section">
+                    <div class="input-group">
+                        <input type="number" id="hdl" name="HDL" placeholder="أدخل القيمة" step="0.01">
+                        <span class="unit">mg/dL</span>
+                    </div>
+                    <div id="hdl-status" class="status-indicator" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Triglycerides -->
+            <div class="metric-card triglycerides">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="emoji">🍔</span>
+                        <div>
+                            <div class="metric-name">الدهون الثلاثية</div>
+                            <div class="english-name">Triglycerides</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-section">
+                    <div class="input-group">
+                        <input type="number" id="triglycerides" name="Triglycerides" placeholder="أدخل القيمة" step="0.01">
+                        <span class="unit">mg/dL</span>
+                    </div>
+                    <div id="triglycerides-status" class="status-indicator" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Haemoglobin -->
+            <div class="metric-card haemoglobin">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="emoji">🩸</span>
+                        <div>
+                            <div class="metric-name">الهيموجلوبين</div>
+                            <div class="english-name">Haemoglobin</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-section">
+                    <div class="input-group">
+                        <input type="number" id="haemoglobin" name="Haemoglobin" placeholder="أدخل القيمة" step="0.01">
+                        <span class="unit">g/dL</span>
+                    </div>
+                    <div id="haemoglobin-status" class="status-indicator" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- MCV -->
+            <div class="metric-card mcv">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="emoji">🔬</span>
+                        <div>
+                            <div class="metric-name">متوسط حجم الكرية</div>
+                            <div class="english-name">MCV</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-section">
+                    <div class="input-group">
+                        <input type="number" id="mcv" name="MCV" placeholder="أدخل القيمة" step="0.01">
+                        <span class="unit">fL</span>
+                    </div>
+                    <div id="mcv-status" class="status-indicator" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Blood Glucose -->
+            <div class="metric-card glucose">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span class="emoji">🍬</span>
+                        <div>
+                            <div class="metric-name">مستوى السكر في الدم</div>
+                            <div class="english-name">Blood Glucose</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-section">
+                    <div class="input-group">
+                        <input type="number" id="blood_glucose" name="blood_glucose" placeholder="أدخل القيمة" step="0.01">
+                        <span class="unit">mg/dL</span>
+                    </div>
+                    <div id="glucose-status" class="status-indicator" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Analysis Section -->
+            <div class="analysis-section">
+                <h2>📊 تحليل النتائج | Analysis Results</h2>
+                <button type="submit" class="analysis-btn" id="analyze-btn">تحليل شامل للنتائج</button>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>جاري تحليل البيانات...</p>
+                </div>
+
+                <div id="results" class="results-area">
+                    <div class="result-header">
+                        <div id="result-emoji" class="result-emoji"></div>
+                        <div id="result-title" class="result-title"></div>
+                    </div>
+                    <div id="result-content"></div>
+                    <button class="reset-btn" id="reset-btn">إدخال بيانات جديدة</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Reference ranges for health metrics
+        const ranges = {
+            hba1c: { normal: [0, 5.7], prediabetes: [5.7, 6.5], diabetes: [6.5, 20] },
+            systolic: { low: [0, 90], normal: [90, 120], elevated: [120, 130], high1: [130, 140], high2: [140, 200] },
+            diastolic: { low: [0, 60], normal: [60, 80], elevated: [80, 90], high1: [90, 100], high2: [100, 200] },
+            ldl: { optimal: [0, 100], near: [100, 130], borderline: [130, 160], high: [160, 190], very_high: [190, 500] },
+            hdl: { low: [0, 40], normal: [40, 200] },
+            triglycerides: { normal: [0, 150], borderline: [150, 200], high: [200, 500], very_high: [500, 1000] },
+            haemoglobin: { low_male: [0, 13.8], normal_male: [13.8, 17.2], low_female: [0, 12.1], normal_female: [12.1, 15.1] },
+            mcv: { low: [0, 80], normal: [80, 100], high: [100, 200] },
+            glucose: { low: [0, 70], normal: [70, 100], prediabetes: [100, 126], diabetes: [126, 500] }
+        };
+
+        function getStatus(value, metric) {
+            const range = ranges[metric];
+            if (!range || !value) return '';
+
+            switch (metric) {
+                case 'hba1c':
+                    if (value < range.normal[1]) return { class: 'status-normal', text: 'طبيعي | Normal' };
+                    if (value < range.diabetes[0]) return { class: 'status-warning', text: 'ما قبل السكري | Pre-diabetes' };
+                    return { class: 'status-danger', text: 'سكري | Diabetes' };
+
+                case 'systolic':
+                    if (value < range.normal[1]) return { class: 'status-normal', text: 'طبيعي | Normal' };
+                    if (value < range.elevated[1]) return { class: 'status-warning', text: 'مرتفع | Elevated' };
+                    return { class: 'status-danger', text: 'ضغط مرتفع | High BP' };
+
+                case 'diastolic':
+                    if (value < range.normal[1]) return { class: 'status-normal', text: 'طبيعي | Normal' };
+                    if (value < range.elevated[1]) return { class: 'status-warning', text: 'مرتفع | Elevated' };
+                    return { class: 'status-danger', text: 'ضغط مرتفع | High BP' };
+
+                case 'ldl':
+                    if (value < range.optimal[1]) return { class: 'status-normal', text: 'مثالي | Optimal' };
+                    if (value < range.borderline[1]) return { class: 'status-warning', text: 'حدي | Borderline' };
+                    return { class: 'status-danger', text: 'مرتفع | High' };
+
+                case 'hdl':
+                    if (value >= range.normal[0]) return { class: 'status-normal', text: 'جيد | Good' };
+                    return { class: 'status-warning', text: 'منخفض | Low' };
+
+                case 'triglycerides':
+                    if (value < range.normal[1]) return { class: 'status-normal', text: 'طبيعي | Normal' };
+                    if (value < range.high[0]) return { class: 'status-warning', text: 'حدي | Borderline' };
+                    return { class: 'status-danger', text: 'مرتفع | High' };
+
+                case 'glucose':
+                    if (value < range.normal[1]) return { class: 'status-normal', text: 'طبيعي | Normal' };
+                    if (value < range.diabetes[0]) return { class: 'status-warning', text: 'ما قبل السكري | Pre-diabetes' };
+                    return { class: 'status-danger', text: 'سكري | Diabetes' };
+
+                default:
+                    return { class: 'status-normal', text: 'تم الإدخال | Entered' };
+            }
+        }
+
+        // Add event listeners to inputs for real-time status updates
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', function() {
+                const metric = this.id.replace('_bp', '').replace('_', '');
+                const value = parseFloat(this.value);
+                let statusElement = document.getElementById(metric + '-status');
+                
+                // Handle special cases for BP inputs
+                if (this.id === 'systolic_bp') {
+                    statusElement = document.getElementById('systolic-status');
+                } else if (this.id === 'diastolic_bp') {
+                    statusElement = document.getElementById('diastolic-status');
+                } else if (this.id === 'blood_glucose') {
+                    statusElement = document.getElementById('glucose-status');
+                }
+                
+                if (value && !isNaN(value)) {
+                    let statusMetric = metric;
+                    if (this.id === 'systolic_bp') statusMetric = 'systolic';
+                    if (this.id === 'diastolic_bp') statusMetric = 'diastolic';
+                    if (this.id === 'blood_glucose') statusMetric = 'glucose';
+                    
+                    const status = getStatus(value, statusMetric);
+                    if (status && statusElement) {
+                        statusElement.className = `status-indicator ${status.class}`;
+                        statusElement.textContent = status.text;
+                        statusElement.style.display = 'block';
+                    }
+                } else if (statusElement) {
+                    statusElement.style.display = 'none';
+                }
+            });
+        });
+
+        // Form submission handler
+        document.getElementById('health-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            
+            // Show loading
+            loading.classList.add('show');
+            analyzeBtn.disabled = true;
+            results.classList.remove('show');
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'حدث خطأ في الاتصال بالخادم.');
+                }
+
+                const result = await response.json();
+                displayResults(result);
+
+            } catch (error) {
+                displayError(error.message);
+            } finally {
+                loading.classList.remove('show');
+                analyzeBtn.disabled = false;
+            }
+        });
+
+        function displayResults(result) {
+            const emojiMap = {
+                'Anemia': '🩸',
+                'Hypertension': '❤️',
+                'Diabetes': '🍬',
+                'High_Cholesterol': '🧈',
+                'Fit': '✅'
+            };
+
+            const emoji = emojiMap[result.disease] || '❓';
+            const rec = result.recommendation;
+
+            document.getElementById('result-emoji').textContent = emoji;
+            document.getElementById('result-title').textContent = rec.title;
+            
+            const content = `
+                <div class="result-section fade-in">
+                    <h4>🔹 وقاية:</h4>
+                    <p>${rec.prevention}</p>
+                </div>
+                <div class="result-section fade-in">
+                    <h4>🔹 علاج:</h4>
+                    <p>${rec.treatment}</p>
+                </div>
+                <div class="result-section fade-in">
+                    <h4>💊 طريقة علاج مقترحة:</h4>
+                    <p>${rec.suggested_plan}</p>
+                </div>
+            `;
+            
+            document.getElementById('result-content').innerHTML = content;
+            document.getElementById('results').classList.add('show');
+        }
+
+        function displayError(message) {
+            document.getElementById('result-emoji').textContent = '❌';
+            document.getElementById('result-title').textContent = 'خطأ | Error';
+            document.getElementById('result-content').innerHTML = `
+                <div class="result-section">
+                    <p style="color: #e74c3c; text-align: center;">${message}</p>
+                </div>
+            `;
+            document.getElementById('results').classList.add('show');}
